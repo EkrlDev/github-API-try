@@ -11,6 +11,7 @@
     <button id="btnIssues">Get Issues</button>
     <button id="btnCommits">Get Commits</button>
     <button id="btnIssuesPrivate">Get Issues Private</button>
+    <button id="btnCreateIssue">Create Issue</button>
     <div id="divResults"></div>
 
     <script>
@@ -23,6 +24,8 @@
     btnCommits.addEventListener('click', e => getCommits());
     const btnIssuesPrivate = document.getElementById('btnIssuesPrivate');
     btnIssuesPrivate.addEventListener('click', getIssuesPrivate);
+    const btnCreateIssue = document.getElementById('btnCreateIssue');
+    btnCreateIssue.addEventListener('click', createIssues);
 
     const divResults = document.getElementById('divResults');
 
@@ -59,7 +62,7 @@
         })
 
     }
-    //
+    //We get the issues at a private repo so we use authorized connection to API
     async function getIssuesPrivate() {
         clear()
         /******* unencrypted way --> BAD!!!
@@ -73,7 +76,6 @@
         //Encrypted way --> GOOD!!
         const headers = {
             "Authorization" : `Token  2939733c5f460d3908db2d1855848fd02f4e46ce`
-
         }
 
         const url = 'https://api.github.com/search/issues?q=repo:ErhnKrl/myPrivate type:issue';
@@ -90,6 +92,31 @@
             divResults.appendChild(document.createElement('br'));
 
         })
+
+    }
+
+    //we create an issue so this is not a GET fetch this is a POST fetch
+    async function createIssues() {
+        clear()
+        const headers = {
+            "Authorization" : `Token  662551e167f30493156959e6c47aa0ee8ed0bec9`
+        }//we need authorization for write rights
+        const payLoad = {
+            title: 'This is a by API issue'
+        }
+        const url = 'https://api.github.com/repos/ErhnKrl/github-API-try/issues';
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payLoad)
+        });
+        const result = await response.json();//result is an object
+        const i = result;
+            const anchor = document.createElement('a');
+            anchor.href = i.html_url;
+            anchor.textContent = i.title;
+            divResults.appendChild(anchor);
+            divResults.appendChild(document.createElement('br'));
 
     }
 

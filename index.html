@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>github API</title>
+</head>
+<body>
+    <h1>Github API Tries</h1>
+    <button id="btnRepos">Get Repos</button>
+    <button id="btnIssues">Get Issues</button>
+    <button id="btnCommits">Get Commits</button>
+    <div id="divResults"></div>
+
+    <script>
+
+    const btnRepos = document.getElementById('btnRepos');
+    btnRepos.addEventListener('click', getRepos);
+    const btnIssues = document.getElementById('btnIssues');
+    btnIssues.addEventListener('click', getIssues);
+    const btnCommits = document.getElementById('btnCommits');
+    btnCommits.addEventListener('click', getCommits);
+
+    const divResults = document.getElementById('divResults');
+
+    //getting the names of repos which has 100000 and over stars
+    async function getRepos() {
+        clear()
+        const url = 'https://api.github.com/search/repositories?q=stars:>100000';
+        const response = await fetch(url);
+        const result = await response.json();//result is an object
+        result.items.forEach(i => {//items is an array of object and i is an object we write the full_name propertys value
+            const anchor = document.createElement('a');
+            anchor.href = i.html_url;
+            anchor.textContent = i.full_name;
+            divResults.appendChild(anchor);
+            divResults.appendChild(document.createElement('br'));
+
+        })
+
+    }
+
+    //We get the issues or comment of a specific user of github
+    async function getIssues() {
+        clear()
+        const url = 'https://api.github.com/search/issues?q=author:ikoral';
+        const response = await fetch(url);
+        const result = await response.json();//result is an object
+        result.items.forEach(i => {//items is an array of object and i is an object we write the full_name propertys value
+            const anchor = document.createElement('a');
+            anchor.href = i.html_url;
+            anchor.textContent = i.title;
+            divResults.appendChild(anchor);
+            divResults.appendChild(document.createElement('br'));
+
+        })
+
+    }
+
+    //we get commit on a specific repo
+    async function getCommits() {
+        clear()
+        const url = 'https://api.github.com/search/commits?q=repo:freecodecamp/freecodecamp';
+        const response = await fetch(url);
+        const result = await response.json();//result is an object
+        result.items.forEach(i => {//items is an array of object and i is an object we write the full_name propertys value
+            const anchor = document.createElement('a');
+            anchor.href = i.html_url;
+            anchor.textContent = i.title;
+            divResults.appendChild(anchor);
+            divResults.appendChild(document.createElement('br'));
+
+        })
+
+    }
+
+    function clear() {
+        if(divResults.firstChild) {
+            divResults.innerHTML = '';
+        }
+    }
+    </script>
+
+</body>
+</html>

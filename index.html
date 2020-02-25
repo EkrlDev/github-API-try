@@ -10,6 +10,7 @@
     <button id="btnRepos">Get Repos</button>
     <button id="btnIssues">Get Issues</button>
     <button id="btnCommits">Get Commits</button>
+    <button id="btnIssuesPrivate">Get Issues Private</button>
     <div id="divResults"></div>
 
     <script>
@@ -19,7 +20,9 @@
     const btnIssues = document.getElementById('btnIssues');
     btnIssues.addEventListener('click', getIssues);
     const btnCommits = document.getElementById('btnCommits');
-    btnCommits.addEventListener('click', getCommits);
+    btnCommits.addEventListener('click', e => getCommits());
+    const btnIssuesPrivate = document.getElementById('btnIssuesPrivate');
+    btnIssuesPrivate.addEventListener('click', getIssuesPrivate);
 
     const divResults = document.getElementById('divResults');
 
@@ -56,12 +59,28 @@
         })
 
     }
-
-    //we get commit on a specific repo
-    async function getCommits() {
+    //
+    async function getIssuesPrivate() {
         clear()
-        const url = 'https://api.github.com/search/commits?q=repo:freecodecamp/freecodecamp';
-        const response = await fetch(url);
+        /******* unencrypted way --> BAD!!!
+        const username = 'ErhnKrl';
+        const password = 'password*'
+        const headers = {
+            "Authorization" : "Basic " + btoa(username + ':' + password)
+
+        }*/
+
+        //Encrypted way --> GOOD!!
+        const headers = {
+            "Authorization" : `Token  2939733c5f460d3908db2d1855848fd02f4e46ce`
+
+        }
+
+        const url = 'https://api.github.com/search/issues?q=repo:ErhnKrl/myPrivate type:issue';
+        const response = await fetch(url, {
+            "method" : "GET",
+            "headers" : headers
+        });
         const result = await response.json();//result is an object
         result.items.forEach(i => {//items is an array of object and i is an object we write the full_name propertys value
             const anchor = document.createElement('a');
@@ -74,12 +93,55 @@
 
     }
 
+    //we get commit on a specific repo
+    async function getCommits(url = 'https://api.github.com/search/commits?q=repo:freecodecamp/freecodecamp author-date:2019-03-01..2020-01-31') {
+        clear()//clear the result div
+
+        const headers = {//headers is an JSON object
+            "Accept" : "application/vnd.github.cloak-preview"
+
+        }
+        const response = await fetch(url, {
+            "method" : "GET",
+            "headers" : headers
+        });//fetch actually takes two parameters, second is an JSON object
+        const link = response.headers.get('link');
+        console.log(link);
+        const links = link.split(',');
+        const urls = links.map(a => {
+            return {
+                url: a.split(';')[0].replace('>','').replace('<',''),
+                title: a.split(';')[1]
+            }
+        })
+        const result = await response.json();//result is an object
+        result.items.forEach(i => {//items is an array of object and i is an object we write the full_name propertys value
+            const img = document.createElement('img');
+            img.src = i.author.avatar_url;//users images
+            img.style.width = '32px';
+            img.style.height = '32px';
+            const anchor = document.createElement('a');
+            anchor.href = i.html_url;//link of commits
+            anchor.textContent = i.commit.message.substr(0, 120)+'...';//we take first 120 wors of commits
+            divResults.appendChild(img);
+            divResults.appendChild(anchor);  
+            divResults.appendChild(document.createElement('br'));  
+        })
+
+        urls.forEach(u => {
+            const btn = document.createElement('button');
+            btn.textContent = u.title; 
+            btn.addEventListener('click', e => getCommits(u.url));
+            divResults.appendChild(btn);
+        });
+
+    }
+ 
     function clear() {
         if(divResults.firstChild) {
             divResults.innerHTML = '';
         }
     }
     </script>
-
 </body>
 </html>
